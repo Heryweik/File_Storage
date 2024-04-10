@@ -41,7 +41,7 @@ interface ModalFileProps {
   orgId: string | undefined;
 }
 
-export default function ModalFile({ orgId }: ModalFileProps) {
+export default function UploadButton({ orgId }: ModalFileProps) {
   const generateUploadUrl = useMutation(api.files.generateUploadUrl);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -56,7 +56,6 @@ export default function ModalFile({ orgId }: ModalFileProps) {
   const fileRef = form.register("file");
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
 
     if (!orgId) return;
 

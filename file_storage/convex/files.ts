@@ -35,7 +35,6 @@ export const createFile = mutation({
     fileId: v.id("_storage"),
   },
   async handler(ctx, args) {
-
     /* 
     error de prueba:
     throw new ConvexError("You must be logged in to upload a file"); */
@@ -60,7 +59,7 @@ export const createFile = mutation({
     await ctx.db.insert("files", {
       name: args.name,
       orgId: args.orgId,
-        fileId: args.fileId,
+      fileId: args.fileId,
     });
   },
 });
@@ -94,3 +93,42 @@ export const getFiles = query({
       .collect();
   },
 });
+
+// This is a mutation that deletes a file from the database
+export const deleteFile = mutation({
+  args: {
+    fileId: v.id("files"),
+  },
+  async handler(ctx, args) {
+    const identity = await ctx.auth.getUserIdentity();
+
+    // si no esta logeado, no puede ver los archivos
+    if (!identity) {
+      throw new ConvexError("You do not have access to this organization");
+    }
+
+    const file = await ctx.db.get(args.fileId);
+
+    if (!file) {
+      throw new ConvexError("File not found");
+    }
+
+    // Verifica si file.orgId existe antes de usarlo
+    if (!file.orgId) {
+      throw new ConvexError("Organization ID is missing for this file");
+    }
+
+    const hasAccess = await hasAccessToOrg(
+      ctx,
+      identity.tokenIdentifier,
+      file.orgId
+    );
+
+    if (!hasAccess) {
+      throw new ConvexError("You do not have access to delete this file");
+    }
+
+    await ctx.db.delete(args.fileId);
+  },
+});
+

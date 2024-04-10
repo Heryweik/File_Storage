@@ -1,6 +1,7 @@
 "use client";
 
-import ModalFile from "@/components/modal_file";
+import FileCard from "@/components/file-card";
+import UploadButton from "@/components/upload-button";
 import { api } from "@/convex/_generated/api";
 import {
   SignInButton,
@@ -10,7 +11,7 @@ import {
   useOrganization,
   useUser,
 } from "@clerk/nextjs";
-import { useMutation, useQuery } from "convex/react";
+import { useQuery } from "convex/react";
 
 
 export default function Home() {
@@ -43,13 +44,16 @@ export default function Home() {
       </SignInButton>
       </SignedOut> */}
 
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center mb-8">
         <h1 className="text-4xl font-bold">Your Files</h1>
 
-        <ModalFile orgId={orgId}/>
+        <UploadButton orgId={orgId}/>
       </div>
 
-      {files?.map((file) => <div key={file._id}>{file.name}</div>)}
+      <div className="grid  md:grid-cols-4 sm:grid-cols-2 grid-cols-1 gap-4">
+      {files?.map((file) => <FileCard key={file._id} file={file} />)}
+
+      </div>
     </main>
   );
 }
