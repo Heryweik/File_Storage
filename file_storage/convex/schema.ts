@@ -1,6 +1,15 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
+// el orgId es opcional porque tambien existe la opcion de que el usuarion no este en una organizacion
 export default defineSchema({
-  files: defineTable({ name: v.string() }),
+  files: defineTable({ 
+    name: v.string(), 
+    orgId: v.optional(v.string()) ,
+    fileId: v.id("_storage")
+  }).index("by_orgId", ["orgId"]),
+  users: defineTable({ 
+    tokenIdentifier: v.string(), 
+    orgIds: v.array(v.string())
+  }).index('by_tokenIdentifier', ['tokenIdentifier']),
 });
