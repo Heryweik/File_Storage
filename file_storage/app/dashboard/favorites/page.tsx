@@ -11,7 +11,7 @@ export default function FavoritePage() {
 
   return (
     <div>
-        <FileBrowser title={"Your Favorites"} favorite />
+        <FileBrowser title={"Your Favorites"} favoritesOnly />
     </div>
   )
 }

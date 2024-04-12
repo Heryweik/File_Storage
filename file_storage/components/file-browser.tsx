@@ -38,10 +38,10 @@ function Placeholder({ orgId }: { orgId: string | undefined }) {
 
 interface FileBrowserProps {
   title: string;
-  favorite?: boolean;
+  favoritesOnly?: boolean;
 }
 
-export function FileBrowser({ title, favorite }: FileBrowserProps) {
+export function FileBrowser({ title, favoritesOnly }: FileBrowserProps) {
   // clerk nos da la organización actual y el usuario
   const organization = useOrganization();
   const user = useUser();
@@ -53,10 +53,12 @@ export function FileBrowser({ title, favorite }: FileBrowserProps) {
     orgId = organization?.organization?.id ?? user?.user?.id;
   }
 
-  // Le decimos que queremos los archivos de la organización actual, esto va en base al args de la query en el archivo convex/files.ts
-  const files = useQuery(api.files.getFiles, orgId ? { orgId, query, favorites: favorite } : "skip");
-  const isLoading = files === undefined;
+  
+  const favorites = useQuery(api.files.getAllFavorites, orgId ? { orgId } : "skip") 
 
+  // Le decimos que queremos los archivos de la organización actual, esto va en base al args de la query en el archivo convex/files.ts
+  const files = useQuery(api.files.getFiles, orgId ? { orgId, query, favorites: favoritesOnly } : "skip");
+  const isLoading = files === undefined;
 
   return (
 
@@ -80,7 +82,7 @@ export function FileBrowser({ title, favorite }: FileBrowserProps) {
               {files.length === 0 && <Placeholder orgId={orgId} />}
 
               <div className="grid  md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-4">
-                {files?.map((file) => <FileCard key={file._id} file={file} />)}
+                {files?.map((file) => <FileCard key={file._id} favorites={favorites ?? []} file={file} />)}
               </div>
             </>
           )}

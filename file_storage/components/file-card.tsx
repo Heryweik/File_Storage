@@ -24,6 +24,7 @@ import {
   FileText,
   GanttChartIcon,
   ImageIcon,
+  StarHalf,
   StarIcon,
   Trash,
 } from "lucide-react";
@@ -44,12 +45,19 @@ import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { toast } from "./ui/use-toast";
 import Image from "next/image";
+import { Protect } from "@clerk/nextjs";
 
 interface FileCardProps {
   file: Doc<"files">;
+  favorites: Doc<"favorites">[];
 }
 
-function FileCardActions({ file }: FileCardProps) {
+interface FileCardActionsProps {
+  file: Doc<"files">;
+  isFavorited: boolean;
+}
+
+function FileCardActions({ file, isFavorited }: FileCardActionsProps) {
   const deleteFile = useMutation(api.files.deleteFile);
   const toggleFavorite = useMutation(api.files.toggleFavorite);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -94,15 +102,28 @@ function FileCardActions({ file }: FileCardProps) {
             onClick={() => toggleFavorite({ fileId: file._id })}
             className="flex items-center gap-1  cursor-pointer"
           >
-            <StarIcon className="h-4 w-4" /> Favorite
+            {isFavorited ? (
+              <StarIcon className="h-4 w-4 text-yellow-500" />
+            ) : (
+              <StarIcon className="h-4 w-4" />
+            )}
+            Favorite
           </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={() => setIsConfirmOpen(true)}
-            className="flex items-center gap-1 text-red-600 cursor-pointer"
+          <Protect
+          role={"org:admin"}
+            fallback={
+              <></>
+            }
           >
-            <Trash className="h-4 w-4" /> Delete
-          </DropdownMenuItem>
+            
+          <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={() => setIsConfirmOpen(true)}
+              className="flex items-center gap-1 text-red-600 cursor-pointer"
+            >
+              <Trash className="h-4 w-4" /> Delete
+            </DropdownMenuItem>
+          </Protect>
         </DropdownMenuContent>
       </DropdownMenu>
     </>
@@ -113,7 +134,7 @@ function FileCardActions({ file }: FileCardProps) {
 function getFilesUrl(fileId: Id<"_storage">): string {
   return `${process.env.NEXT_PUBLIC_CONVEX_URL}/api/storage/${fileId}`;
 }
-export default function FileCard({ file }: FileCardProps) {
+export default function FileCard({ file, favorites }: FileCardProps) {
   const typeIcons = {
     image: <ImageIcon />,
     pdf: <BookText />,
@@ -121,6 +142,10 @@ export default function FileCard({ file }: FileCardProps) {
     txt: <FileText />,
     svg: <FileImage />,
   } as Record<Doc<"files">["type"], ReactNode>;
+
+  const isFavorited = favorites.some(
+    (favorite) => favorite.fileId === file._id
+  );
 
   return (
     <Card>
@@ -130,7 +155,7 @@ export default function FileCard({ file }: FileCardProps) {
           {file.name}
         </CardTitle>
         <div className="absolute right-2 top-2">
-          <FileCardActions file={file} />
+          <FileCardActions file={file} isFavorited={isFavorited} />
         </div>
       </CardHeader>
       <CardContent className="h-[200px] flex justify-center items-center">
