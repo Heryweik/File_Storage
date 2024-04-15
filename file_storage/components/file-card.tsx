@@ -23,11 +23,11 @@ import Image from "next/image";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 
 import {formatRelative} from 'date-fns'
-import { FileCardActions, getFilesUrl } from "./file-actions";
+import { FileCardActions } from "./file-actions";
 
 interface FileCardProps {
   // le agregamos la propiedad isFavorited
-  file: Doc<"files"> & {isFavorited: boolean};
+  file: Doc<"files"> & { isFavorited: boolean; url: string | null };
 }
 
 export default function FileCard({ file }: FileCardProps) {
@@ -60,13 +60,8 @@ export default function FileCard({ file }: FileCardProps) {
         </div>
       </CardHeader>
       <CardContent className="h-[200px] flex justify-center items-center">
-        {file.type === "image" && (
-          <Image
-            src={getFilesUrl(file.fileId)}
-            alt={file.name}
-            width={300}
-            height={300}
-          />
+      {file.type === "image" && file.url && (
+          <Image alt={file.name} width="200" height="100" src={file.url} className="aspect-video object-cover w-full hover:scale-105 transition" />
         )}
         {file.type === "pdf" && <BookText className="h-20 w-20" />}
         {file.type === "csv" && <GanttChartIcon className="h-20 w-20" />}

@@ -36,7 +36,7 @@
 import { Protect } from "@clerk/nextjs";
 
   interface FileCardActionsProps {
-    file: Doc<"files">;
+    file: Doc<"files"> & { url: string | null };
     isFavorited: boolean;
   }
   
@@ -88,9 +88,8 @@ import { Protect } from "@clerk/nextjs";
   
             <DropdownMenuItem
               onClick={() => {
-                window.open(getFilesUrl(file.fileId), "_blank");
-    
-                console.log("direccion del archivo", getFilesUrl(file.fileId));
+                if (!file.url) return;
+                window.open(file.url, "_blank");
               }}
               className="flex items-center gap-1  cursor-pointer"
             >
@@ -150,7 +149,7 @@ import { Protect } from "@clerk/nextjs";
   }
   
   // Obtener los archivos para mostrarlos en la pagina
-  export function getFilesUrl(fileId: Id<"_storage">): string {
+  /* export function getFilesUrl(fileId: Id<"_storage">): string {
     return `${process.env.NEXT_PUBLIC_CONVEX_URL}/api/storage/${fileId}`;
-  }
+  } */
   
