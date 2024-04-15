@@ -1,4 +1,3 @@
-
 "use client";
 
 import FileCard from "@/components/file-card";
@@ -15,10 +14,13 @@ import {
   useUser,
 } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
-import { FileIcon, Loader2, StarIcon } from "lucide-react";
+import { GridIcon, Loader2, Rows, TableIcon } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
 import { useState } from "react";
+import { DataTable } from "./file-table";
+import { columns } from "./colums";
+
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 function Placeholder({ orgId }: { orgId: string | undefined }) {
   return (
@@ -42,7 +44,11 @@ interface FileBrowserProps {
   deletedOnly?: boolean;
 }
 
-export function FileBrowser({ title, favoritesOnly, deletedOnly }: FileBrowserProps) {
+export function FileBrowser({
+  title,
+  favoritesOnly,
+  deletedOnly,
+}: FileBrowserProps) {
   // clerk nos da la organización actual y el usuario
   const organization = useOrganization();
   const user = useUser();
@@ -54,39 +60,71 @@ export function FileBrowser({ title, favoritesOnly, deletedOnly }: FileBrowserPr
     orgId = organization?.organization?.id ?? user?.user?.id;
   }
 
-  
-  const favorites = useQuery(api.files.getAllFavorites, orgId ? { orgId } : "skip") 
+  const favorites = useQuery(
+    api.files.getAllFavorites,
+    orgId ? { orgId } : "skip"
+  );
 
   // Le decimos que queremos los archivos de la organización actual, esto va en base al args de la query en el archivo convex/files.ts
-  const files = useQuery(api.files.getFiles, orgId ? { orgId, query, favorites: favoritesOnly, deletedOnly } : "skip");
+  const files = useQuery(
+    api.files.getFiles,
+    orgId ? { orgId, query, favorites: favoritesOnly, deletedOnly } : "skip"
+  );
   const isLoading = files === undefined;
 
+  // Le agregamos la propiedad isFavorited a cada archivo, para saber si está en favoritos o no
+  const modifiedFiles =
+    files?.map((file) => {
+      return {
+        ...file,
+        // los arreglos vacíos son falsos, por lo que si hay algún archivo en favoritos que tenga el mismo id que el archivo actual, entonces el archivo actual está en favoritos
+        isFavorited: (favorites ?? []).some(
+          (favorite) => favorite.fileId === file._id
+        ),
+      };
+    }) ?? [];
+
   return (
+    <div>
+          <div className="flex justify-between items-center mb-8">
+            <h1 className="text-4xl font-bold">{title}</h1>
 
-        <div >
-          {isLoading && (
-            <div className="flex flex-col gap-6 w-full items-center mt-20">
-              <Loader2 className="h-32 w-32 animate-spin text-gray-500" />
-              <div className="text-2xl">Loading...</div>
-            </div>
-          )}
+            <SearchBar query={query} setQuery={setQuery} />
+            <UploadButton orgId={orgId} />
+          </div>
 
-          {!isLoading && (
-            <>
-              <div className="flex justify-between items-center mb-8">
-                <h1 className="text-4xl font-bold">{title}</h1>
+          <Tabs defaultValue="grid">
+            <TabsList className="mb-2">
+              <TabsTrigger value="grid" className="flex gap-2 items-center">
+                <GridIcon />
+                Grid
+              </TabsTrigger>
+              <TabsTrigger value="table" className="flex gap-2 items-center">
+                <Rows />
+                Table
+              </TabsTrigger>
+            </TabsList>
 
-                <SearchBar query={query} setQuery={setQuery} />
-                <UploadButton orgId={orgId} />
+            {isLoading && (
+              <div className="flex flex-col gap-6 w-full items-center mt-20">
+                <Loader2 className="h-32 w-32 animate-spin text-gray-500" />
+                <div className="text-2xl">Loading your files...</div>
               </div>
+            )}
 
-              {files.length === 0 && <Placeholder orgId={orgId} />}
-
-              <div className="grid  md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-4">
-                {files?.map((file) => <FileCard key={file._id} favorites={favorites ?? []} file={file} />)}
+            <TabsContent value="grid">
+              <div className="grid  lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-4">
+                {modifiedFiles?.map((file) => (
+                  <FileCard key={file._id} file={file} />
+                ))}
               </div>
-            </>
-          )}
-        </div>
+            </TabsContent>
+            <TabsContent value="table">
+              <DataTable columns={columns} data={modifiedFiles} />
+            </TabsContent>
+          </Tabs>
+
+          {files?.length === 0 && <Placeholder orgId={orgId} />}
+    </div>
   );
 }
