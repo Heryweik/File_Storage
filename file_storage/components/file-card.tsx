@@ -20,6 +20,7 @@ import {
 import {
   BookText,
   EllipsisVertical,
+  FileIcon,
   FileImage,
   FileText,
   GanttChartIcon,
@@ -27,6 +28,7 @@ import {
   StarHalf,
   StarIcon,
   Trash,
+  Undo,
 } from "lucide-react";
 
 import {
@@ -41,11 +43,14 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { ReactNode, useState } from "react";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { toast } from "./ui/use-toast";
 import Image from "next/image";
 import { Protect } from "@clerk/nextjs";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+
+import { format, formatDistance, formatRelative, subDays } from 'date-fns'
 
 interface FileCardProps {
   file: Doc<"files">;
@@ -58,7 +63,9 @@ interface FileCardActionsProps {
 }
 
 function FileCardActions({ file, isFavorited }: FileCardActionsProps) {
+  // useMutation es un hook que permite hacer mutaciones a la base de datos
   const deleteFile = useMutation(api.files.deleteFile);
+  const restoreFile = useMutation(api.files.restoreFile);
   const toggleFavorite = useMutation(api.files.toggleFavorite);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
@@ -69,8 +76,8 @@ function FileCardActions({ file, isFavorited }: FileCardActionsProps) {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete your
-              account and remove your data from our servers.
+              This action will mark the file for deletion proccess. Files are
+              deleted peryodically.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -82,8 +89,8 @@ function FileCardActions({ file, isFavorited }: FileCardActionsProps) {
                 });
                 toast({
                   variant: "default",
-                  title: "File deleted",
-                  description: "Your file is now gone form the system",
+                  title: "File marked for deletion",
+                  description: "Your file will be deleted soon",
                 });
               }}
             >
@@ -98,6 +105,18 @@ function FileCardActions({ file, isFavorited }: FileCardActionsProps) {
           <EllipsisVertical className="h-5 w-5" />
         </DropdownMenuTrigger>
         <DropdownMenuContent>
+
+          <DropdownMenuItem
+            onClick={() => {
+              window.open(getFilesUrl(file.fileId), "_blank");
+  
+              console.log("direccion del archivo", getFilesUrl(file.fileId));
+            }}
+            className="flex items-center gap-1  cursor-pointer"
+          >
+          <FileIcon className="h-4 w-4" /> Download
+          </DropdownMenuItem>
+
           <DropdownMenuItem
             onClick={() => toggleFavorite({ fileId: file._id })}
             className="flex items-center gap-1  cursor-pointer"
@@ -109,19 +128,35 @@ function FileCardActions({ file, isFavorited }: FileCardActionsProps) {
             )}
             Favorite
           </DropdownMenuItem>
-          <Protect
-          role={"org:admin"}
-            fallback={
-              <></>
-            }
-          >
-            
-          <DropdownMenuSeparator />
+
+          <Protect role={"org:admin"} fallback={<></>}>
+            <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={() => setIsConfirmOpen(true)}
-              className="flex items-center gap-1 text-red-600 cursor-pointer"
+              onClick={() => {
+                if (file.shouldDelete) {
+                  restoreFile({
+                    fileId: file._id,
+                  });
+                  toast({
+                    variant: "default",
+                    title: "File restored",
+                    description: "Your file is now available",
+                  });
+                } else {
+                  setIsConfirmOpen(true);
+                }
+              }}
+              className="flex items-center gap-1 cursor-pointer"
             >
-              <Trash className="h-4 w-4" /> Delete
+              {file.shouldDelete ? (
+                <div className=" text-green-600 flex items-center gap-1">
+                  <Undo className="h-4 w-4" /> Restore
+                </div>
+              ) : (
+                <div className=" text-red-600 flex items-center gap-1">
+                  <Trash className="h-4 w-4" /> Delete
+                </div>
+              )}
             </DropdownMenuItem>
           </Protect>
         </DropdownMenuContent>
@@ -134,7 +169,13 @@ function FileCardActions({ file, isFavorited }: FileCardActionsProps) {
 function getFilesUrl(fileId: Id<"_storage">): string {
   return `${process.env.NEXT_PUBLIC_CONVEX_URL}/api/storage/${fileId}`;
 }
+
 export default function FileCard({ file, favorites }: FileCardProps) {
+  // useQuery es un hook que permite hacer consultas a la base de datos
+  const userProfile = useQuery(api.users.getUserProfile, {
+    userId: file.userId,
+  });
+
   const typeIcons = {
     image: <ImageIcon />,
     pdf: <BookText />,
@@ -150,7 +191,7 @@ export default function FileCard({ file, favorites }: FileCardProps) {
   return (
     <Card>
       <CardHeader className="relative">
-        <CardTitle className="flex gap-x-2">
+        <CardTitle className="flex gap-x-2 text-base font-normal">
           <p>{typeIcons[file.type]}</p>
           {file.name}
         </CardTitle>
@@ -172,16 +213,19 @@ export default function FileCard({ file, favorites }: FileCardProps) {
         {file.type === "txt" && <FileText className="h-20 w-20" />}
         {file.type === "svg" && <FileImage className="h-20 w-20" />}
       </CardContent>
-      <CardFooter className="flex justify-center">
-        <Button
-          onClick={() => {
-            window.open(getFilesUrl(file.fileId), "_blank");
+      <CardFooter className="flex justify-between">
+        <div className="flex justify-center gap-2 text-gray-700 text-xs w-40 items-center">
+        <Avatar className="w-6 h-6">
+          <AvatarImage src={userProfile?.image} />
+          <AvatarFallback>CN</AvatarFallback>
+        </Avatar>
+        {userProfile?.name}
+        </div>
+        <div className="text-xs text-gray-700">
+        Uploaded on {formatRelative(new Date(file._creationTime), new Date())}
 
-            console.log("direccion de funcion", getFilesUrl(file.fileId));
-          }}
-        >
-          Download
-        </Button>
+        </div>
+        
       </CardFooter>
     </Card>
   );

@@ -39,9 +39,10 @@ function Placeholder({ orgId }: { orgId: string | undefined }) {
 interface FileBrowserProps {
   title: string;
   favoritesOnly?: boolean;
+  deletedOnly?: boolean;
 }
 
-export function FileBrowser({ title, favoritesOnly }: FileBrowserProps) {
+export function FileBrowser({ title, favoritesOnly, deletedOnly }: FileBrowserProps) {
   // clerk nos da la organización actual y el usuario
   const organization = useOrganization();
   const user = useUser();
@@ -57,7 +58,7 @@ export function FileBrowser({ title, favoritesOnly }: FileBrowserProps) {
   const favorites = useQuery(api.files.getAllFavorites, orgId ? { orgId } : "skip") 
 
   // Le decimos que queremos los archivos de la organización actual, esto va en base al args de la query en el archivo convex/files.ts
-  const files = useQuery(api.files.getFiles, orgId ? { orgId, query, favorites: favoritesOnly } : "skip");
+  const files = useQuery(api.files.getFiles, orgId ? { orgId, query, favorites: favoritesOnly, deletedOnly } : "skip");
   const isLoading = files === undefined;
 
   return (
