@@ -30,7 +30,7 @@
     AlertDialogTrigger,
   } from "@/components/ui/alert-dialog";
   import {useState } from "react";
-  import { useMutation} from "convex/react";
+  import { useMutation, useQuery} from "convex/react";
   import { api } from "@/convex/_generated/api";
   import { toast } from "./ui/use-toast";
 import { Protect } from "@clerk/nextjs";
@@ -45,6 +45,8 @@ import { Protect } from "@clerk/nextjs";
     const deleteFile = useMutation(api.files.deleteFile);
     const restoreFile = useMutation(api.files.restoreFile);
     const toggleFavorite = useMutation(api.files.toggleFavorite);
+    const me = useQuery(api.users.getMe);
+
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   
     return (
@@ -107,7 +109,11 @@ import { Protect } from "@clerk/nextjs";
               Favorite
             </DropdownMenuItem>
   
-            <Protect role={"org:admin"} fallback={<></>}>
+            <Protect condition={(check) => {
+              return check({
+                role: "org:admin",
+              }) || file.userId === me?._id;
+            }} fallback={<></>}>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => {
