@@ -14,7 +14,7 @@ import Link from "next/link";
 export default function Header() {
 
   return (
-    <div className="border-b py-4 bg-gray-50 relative z-10">
+    <div className="border-b py-4 bg-gray-50 z-10 fixed w-full">
       <div className="container mx-auto flex justify-between items-center text-gray-800">
         <Link href={"/"} className="flex gap-2 items-center text-xl">
           <Image src="/logo.png" width={40} height={30} alt="File Drive" />

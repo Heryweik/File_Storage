@@ -21,7 +21,7 @@ export default function DashboardLayout({
         <SideNav />
 
         {/* Archivos */}
-        <div className="w-full">
+        <div className="w-full pl-40">
           {children}
         </div>
       </div>

@@ -12,7 +12,7 @@ export default function SideNav() {
     const pathname = usePathname();
 
   return (
-    <div className="w-40 flex flex-col gap-4">
+    <div className="w-40 flex flex-col gap-4 fixed">
       <Link href="/dashboard/files">
         <Button variant={"link"} className={clsx("flex gap-2", {
             'text-blue-500': pathname.includes('/dashboard/files')

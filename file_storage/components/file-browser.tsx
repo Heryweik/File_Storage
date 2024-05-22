@@ -80,7 +80,15 @@ export function FileBrowser({
   // Le decimos que queremos los archivos de la organización actual, esto va en base al args de la query en el archivo convex/files.ts
   const files = useQuery(
     api.files.getFiles,
-    orgId ? { orgId, type: type === "all" ? undefined : type, query, favorites: favoritesOnly, deletedOnly } : "skip"
+    orgId
+      ? {
+          orgId,
+          type: type === "all" ? undefined : type,
+          query,
+          favorites: favoritesOnly,
+          deletedOnly,
+        }
+      : "skip"
   );
   const isLoading = files === undefined;
 
@@ -96,8 +104,7 @@ export function FileBrowser({
       };
     }) ?? [];
 
-
-    // El newType es el nuevo tipo de archivo que queremos ver, si es "all" entonces no filtramos por tipo, si no, filtramos por el tipo que queremos ver
+  // El newType es el nuevo tipo de archivo que queremos ver, si es "all" entonces no filtramos por tipo, si no, filtramos por el tipo que queremos ver
   return (
     <div>
       <div className="flex justify-between items-center mb-8">
@@ -121,12 +128,18 @@ export function FileBrowser({
           </TabsList>
           <div className="flex gap-2 items-center">
             <Label htmlFor="type-Select">Type Filter</Label>
-            <Select  value={type} onValueChange={(newType) => {
-              setType(newType as any);
-            
-            }}>
-              <SelectTrigger id="type-Select" className="w-[180px]" defaultValue={"all"}>
-                <SelectValue/>
+            <Select
+              value={type}
+              onValueChange={(newType) => {
+                setType(newType as any);
+              }}
+            >
+              <SelectTrigger
+                id="type-Select"
+                className="w-[180px]"
+                defaultValue={"all"}
+              >
+                <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All</SelectItem>
@@ -159,7 +172,17 @@ export function FileBrowser({
         </TabsContent>
       </Tabs>
 
-      {files?.length === 0 && <Placeholder orgId={orgId} />}
+      {favoritesOnly ? (
+        <div className="w-full h-full text-center mt-20 text-2xl font-semibold">
+          <p>Favorites Files...</p>
+        </div>
+      ) : deletedOnly ? (
+        <div className="w-full h-full text-center mt-20 text-2xl font-semibold">
+          <p>Deleted Files...</p>
+        </div>
+      ) : (
+        <>{files?.length === 0 && <Placeholder orgId={orgId} />}</>
+      )}
     </div>
   );
 }
