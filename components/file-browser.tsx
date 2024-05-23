@@ -94,15 +94,14 @@ export function FileBrowser({
 
   // Le agregamos la propiedad isFavorited a cada archivo, para saber si está en favoritos o no
   const modifiedFiles =
-    files?.map((file) => {
-      return {
-        ...file,
-        // los arreglos vacíos son falsos, por lo que si hay algún archivo en favoritos que tenga el mismo id que el archivo actual, entonces el archivo actual está en favoritos
-        isFavorited: (favorites ?? []).some(
-          (favorite) => favorite.fileId === file._id
-        ),
-      };
-    }) ?? [];
+    files?.map((file) => ({
+      ...file,
+      // los arreglos vacíos son falsos, por lo que si hay algún archivo en favoritos que tenga el mismo id que el archivo actual, entonces el archivo actual está en favoritos
+      isFavorited: (favorites ?? []).some(
+        (favorite) => favorite.fileId === file._id
+      ),
+      url: file.url || "", // Añade la propiedad url si falta
+    })) ?? [];
 
   // El newType es el nuevo tipo de archivo que queremos ver, si es "all" entonces no filtramos por tipo, si no, filtramos por el tipo que queremos ver
   return (
@@ -118,8 +117,8 @@ export function FileBrowser({
         <h1 className="text-2xl md:text-4xl font-bold">{title}</h1>
 
         <div className="flex w-full items-center justify-center">
-        <SearchBar query={query} setQuery={setQuery} />
-        <UploadButton orgId={orgId} />
+          <SearchBar query={query} setQuery={setQuery} />
+          <UploadButton orgId={orgId} />
         </div>
       </div>
 
