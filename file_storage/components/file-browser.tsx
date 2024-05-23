@@ -107,11 +107,20 @@ export function FileBrowser({
   // El newType es el nuevo tipo de archivo que queremos ver, si es "all" entonces no filtramos por tipo, si no, filtramos por el tipo que queremos ver
   return (
     <div>
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-4xl font-bold">{title}</h1>
+      <div className="hidden md:flex justify-between items-center mb-8">
+        <h1 className="text-2xl md:text-4xl font-bold">{title}</h1>
 
         <SearchBar query={query} setQuery={setQuery} />
         <UploadButton orgId={orgId} />
+      </div>
+
+      <div className="flex flex-col md:hidden justify-between items-center mb-8 gap-3">
+        <h1 className="text-2xl md:text-4xl font-bold">{title}</h1>
+
+        <div className="flex w-full items-center justify-center">
+        <SearchBar query={query} setQuery={setQuery} />
+        <UploadButton orgId={orgId} />
+        </div>
       </div>
 
       <Tabs defaultValue="grid">
@@ -119,15 +128,15 @@ export function FileBrowser({
           <TabsList className="mb-2">
             <TabsTrigger value="grid" className="flex gap-2 items-center">
               <GridIcon />
-              Grid
+              <span className="hidden md:block">Grid</span>
             </TabsTrigger>
             <TabsTrigger value="table" className="flex gap-2 items-center">
               <Rows />
-              Table
+              <span className="hidden md:block">Table</span>
             </TabsTrigger>
           </TabsList>
-          <div className="flex gap-2 items-center">
-            <Label htmlFor="type-Select">Type Filter</Label>
+          <div className="flex gap-2 items-center justify-center">
+            <Label htmlFor="type-Select">Filter</Label>
             <Select
               value={type}
               onValueChange={(newType) => {
@@ -136,7 +145,7 @@ export function FileBrowser({
             >
               <SelectTrigger
                 id="type-Select"
-                className="w-[180px]"
+                className=" w-32 md:w-[180px]"
                 defaultValue={"all"}
               >
                 <SelectValue />
@@ -155,8 +164,8 @@ export function FileBrowser({
 
         {isLoading && (
           <div className="flex flex-col gap-6 w-full items-center mt-20">
-            <Loader2 className="h-32 w-32 animate-spin text-gray-500" />
-            <div className="text-2xl">Loading your files...</div>
+            <Loader2 className="h-20 md:h-32 w-20 md:w-32 animate-spin text-gray-500" />
+            <div className="text-xl md:text-2xl">Loading your files...</div>
           </div>
         )}
 
@@ -172,11 +181,11 @@ export function FileBrowser({
         </TabsContent>
       </Tabs>
 
-      {favoritesOnly ? (
+      {favoritesOnly && files?.length === 0 ? (
         <div className="w-full h-full text-center mt-20 text-2xl font-semibold">
           <p>Favorites Files...</p>
         </div>
-      ) : deletedOnly ? (
+      ) : deletedOnly && files?.length === 0 ? (
         <div className="w-full h-full text-center mt-20 text-2xl font-semibold">
           <p>Deleted Files...</p>
         </div>

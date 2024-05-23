@@ -10,7 +10,7 @@ export default function TrashPage() {
 
   return (
     <div>
-        <FileBrowser title={"Your Favorites"} deletedOnly />
+        <FileBrowser title={"Your Deleted"} deletedOnly />
     </div>
   )
 }

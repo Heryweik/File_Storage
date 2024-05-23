@@ -28,7 +28,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useState } from "react";
 import { toast } from "./ui/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, UploadIcon } from "lucide-react";
 import { Doc } from "@/convex/_generated/dataModel";
 
 const formSchema = z.object({
@@ -118,8 +118,13 @@ export default function UploadButton({ orgId }: ModalFileProps) {
         form.reset();
       }}
     >
-      <DialogTrigger className="bg-black rounded-md px-4 py-2 text-white">
+      <DialogTrigger className="bg-black rounded-md px-2 md:px-4 py-2 text-white ml-2">
+        <span className="hidden md:block">
         Upload File
+        </span>
+        <span className="block md:hidden">
+          <UploadIcon />
+        </span>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

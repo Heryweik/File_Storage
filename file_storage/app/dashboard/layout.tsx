@@ -8,6 +8,7 @@ export const metadata: Metadata = {
 }; */
 
 import SideNav from "@/components/side-nav";
+import SideNavMovile from "@/components/side-nav-movile";
 
 export default function DashboardLayout({
   children,
@@ -15,13 +16,14 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <main className="container mx-auto pt-12">
+    <main className="md:container px-3  mx-auto py-12">
 
       <div className="flex gap-8">
         <SideNav />
+        <SideNavMovile />
 
         {/* Archivos */}
-        <div className="w-full pl-40">
+        <div className="w-full md:pl-40">
           {children}
         </div>
       </div>

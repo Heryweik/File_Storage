@@ -60,8 +60,8 @@ export default function SearchBar({ query, setQuery }: SearchBarProps) {
           <Button
             disabled={form.formState.isSubmitting}
             type="submit"
-            className="flex gap-x-2"
-            size={"sm"}
+            className="flex px-2 gap-x-2"
+            size={"icon"}
           >
             {form.formState.isSubmitting && (
               <Loader2 className="h-4 w-4 animate-spin" />

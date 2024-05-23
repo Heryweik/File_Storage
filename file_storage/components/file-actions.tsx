@@ -12,6 +12,7 @@
   } from "@/components/ui/dropdown-menu";
   import {
     EllipsisVertical,
+    EyeIcon,
     FileIcon,
     StarIcon,
     Trash,
@@ -93,7 +94,7 @@ import { Protect } from "@clerk/nextjs";
               }}
               className="flex items-center gap-1  cursor-pointer"
             >
-            <FileIcon className="h-4 w-4" /> Download
+            <EyeIcon className="h-4 w-4" /> Watch
             </DropdownMenuItem>
   
             <DropdownMenuItem

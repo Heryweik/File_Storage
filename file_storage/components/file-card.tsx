@@ -59,9 +59,9 @@ export default function FileCard({ file }: FileCardProps) {
           <FileCardActions file={file} isFavorited={file.isFavorited} />
         </div>
       </CardHeader>
-      <CardContent className="h-[200px] flex justify-center items-center">
+      <CardContent className="h-[200px] flex justify-center overflow-hidden items-center">
       {file.type === "image" && file.url && (
-          <Image alt={file.name} width="200" height="100" src={file.url} className="aspect-video object-cover w-full hover:scale-105 transition" />
+          <Image alt={file.name} width="200" height="100" src={file.url} className="aspect-video object-contain w-full hover:scale-105 transition" />
         )}
         {file.type === "pdf" && <BookText className="h-20 w-20" />}
         {file.type === "csv" && <GanttChartIcon className="h-20 w-20" />}
